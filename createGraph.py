@@ -22,7 +22,6 @@ elif sys.argv[1] == 'l':
     print("Large: " + str(num_student) + "\n")
 
 
-
 R = nx.gnm_random_graph(num_student, int(sys.argv[2]))
 
 print("Vertices: " + str(list(R.nodes)) + "\n")
