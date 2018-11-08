@@ -24,8 +24,8 @@ elif sys.argv[1] == 'l':
 
 R = nx.gnm_random_graph(num_student, int(sys.argv[2]))
 
-print("Vertices: " + str(list(R.nodes)) + "\n")
-print("Edges: " + str(list(R.edges)) + "\n")
+# print("Vertices: " + str(list(R.nodes)) + "\n")
+# print("Edges: " + str(list(R.edges)) + "\n")
 
 # k = number of buses, s = capacity of buses
 k = sys.argv[4]
@@ -47,12 +47,32 @@ for i in range(num_rowdy):
 
     rowdy_groups.append(rowdy_group)
 
-print("Rowdy Groups: \n" + str(rowdy_groups) + "\n")
+# print("Rowdy Groups: \n" + str(rowdy_groups) + "\n")
 
-nx.write_gml(R, "graph.gml")
-with open('parameters.txt', 'w') as o:
-    o.write("%s\n" % str(k))
-    o.write("%s\n" % str(s))
-    for group in rowdy_groups:
-        o.write("%s\n" % group)
+
+if sys.argv[1] == 's':
+    nx.write_gml(R, "./input/small/easy/graph.gml")
+    with open('./all_inputs/small/easy/parameters.txt', 'w') as o:
+        o.write("%s\n" % str(k))
+        o.write("%s\n" % str(s))
+        for group in rowdy_groups:
+            o.write("%s\n" % group)
+
+elif sys.argv[1] == 'm':
+    nx.write_gml(R, "./input/medium/easy/graph.gml")
+    with open('./all_inputs/medium/easy/parameters.txt', 'w') as o:
+        o.write("%s\n" % str(k))
+        o.write("%s\n" % str(s))
+        for group in rowdy_groups:
+            o.write("%s\n" % group)
+
+elif sys.argv[1] == 'l':
+    nx.write_gml(R, "./input/large/easy/graph.gml")
+    with open('./all_inputs/large/easy/parameters.txt', 'w') as o:
+        o.write("%s\n" % str(k))
+        o.write("%s\n" % str(s))
+        for group in rowdy_groups:
+            o.write("%s\n" % group)
+
+
 
