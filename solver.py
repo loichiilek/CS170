@@ -67,6 +67,15 @@ def solve(graph, num_buses, size_bus, constraints):
 
     # 1. randomly initialize buses
     temp_node_list = list(graph.nodes)
+
+    degrees = list(graph.degree)
+    degrees = sorted(degrees, key=lambda x: x[1], reverse=True)
+    for i in range(num_buses):
+        # append the node with the largest degree
+        buses[i].append(degrees[i][0])
+        bus_alloc[degrees[i][0]] = i
+        temp_node_list.remove(degrees[i][0])
+
     for node in temp_node_list:
         max_score = 0
         bus_choice = None
@@ -119,13 +128,80 @@ def solve(graph, num_buses, size_bus, constraints):
                 swap_bus = i
 
         # swapping condition is positive
-        if swap_bus is not None:
+        if (swap_bus is not None) and (len(buses[bus_alloc[node]]) > 1):
             # remove from original bus
             buses[bus_alloc[node]].remove(node)
             # add to new bus
             buses[swap_bus].append(node)
             # update back pointer
             bus_alloc[node] = swap_bus
+
+    for node in graph.nodes:
+        max_swap_score = 0
+        swap_bus = None
+
+        # initialize base scores which are the scores of the bus the node currently belong to
+        base_score = score_graph(graph, buses[bus_alloc[node]], constraints)
+        penis = buses[bus_alloc[node]].copy()
+        penis.remove(node)
+        new_base_score = score_graph(graph, penis, constraints)
+
+        for i in range(num_buses):
+            # calculate swap_score
+            penis2 = buses[i].copy()
+            penis2.append(node)
+            swap_score = score_graph(graph, penis2, constraints) \
+                         + new_base_score \
+                         - score_graph(graph, buses[i], constraints) \
+                         - base_score
+
+            # if larger swap_score, update max_swap_score and indicate bus to do swap
+            if swap_score > max_swap_score and len(buses[i]) < size_bus:
+                max_swap_score = swap_score
+                swap_bus = i
+
+        # swapping condition is positive
+        if (swap_bus is not None) and (len(buses[bus_alloc[node]]) > 1):
+            # remove from original bus
+            buses[bus_alloc[node]].remove(node)
+            # add to new bus
+            buses[swap_bus].append(node)
+            # update back pointer
+            bus_alloc[node] = swap_bus
+
+    for node in graph.nodes:
+        max_swap_score = 0
+        swap_bus = None
+
+        # initialize base scores which are the scores of the bus the node currently belong to
+        base_score = score_graph(graph, buses[bus_alloc[node]], constraints)
+        penis = buses[bus_alloc[node]].copy()
+        penis.remove(node)
+        new_base_score = score_graph(graph, penis, constraints)
+
+        for i in range(num_buses):
+            # calculate swap_score
+            penis2 = buses[i].copy()
+            penis2.append(node)
+            swap_score = score_graph(graph, penis2, constraints) \
+                         + new_base_score \
+                         - score_graph(graph, buses[i], constraints) \
+                         - base_score
+
+            # if larger swap_score, update max_swap_score and indicate bus to do swap
+            if swap_score > max_swap_score and len(buses[i]) < size_bus:
+                max_swap_score = swap_score
+                swap_bus = i
+
+        # swapping condition is positive
+        if (swap_bus is not None) and (len(buses[bus_alloc[node]]) > 1):
+            # remove from original bus
+            buses[bus_alloc[node]].remove(node)
+            # add to new bus
+            buses[swap_bus].append(node)
+            # update back pointer
+            bus_alloc[node] = swap_bus
+
 
 
     return buses
@@ -153,16 +229,13 @@ def main():
             os.mkdir(output_category_path)
 
         for input_folder in os.listdir(category_dir):
-            # print(input_folder)
             input_name = os.fsdecode(input_folder)
-            # print(input_name)
             graph, num_buses, size_bus, constraints = parse_input(category_path + "/" + input_name)
             solution = solve(graph, num_buses, size_bus, constraints)
             output_file = open(output_category_path + "/" + input_name + ".out", "w")
 
             for bus in solution:
-                if bus:
-                    output_file.write("%s\n" % solution[bus])
+                output_file.write("%s\n" % solution[bus])
 
             output_file.close()
 
