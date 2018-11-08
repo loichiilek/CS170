@@ -21,9 +21,18 @@ if sys.argv[1] == 's':
     rowdy_groups = []
 
     for i in range(num_rowdy):
-        rowdy_groups.append(random.sample(range(0, num_student-1), random.randint(3, 5)))
+        rowdy_group = random.sample(range(0, num_student-1), random.randint(3, 5))
+        rowdy_group = list(map(str, rowdy_group))
+        rowdy_groups.append(rowdy_group)
 
-    print("Rowdy Groups: \n" + str(rowdy_groups))
+    print("Rowdy Groups: \n" + str(rowdy_groups) + "\n")
+
+    nx.write_gml(R, "graph.gml")
+    with open('parameters.txt', 'w') as o:
+        o.write("%s\n" % str(k))
+        o.write("%s\n" % str(s))
+        for group in rowdy_groups:
+            o.write("%s\n" % group)
 
 elif sys.argv[1] == 'm':
     print("medium")
