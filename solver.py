@@ -62,14 +62,35 @@ def solve(graph, num_buses, size_bus, constraints):
     buses = defaultdict(list)  # maps which people are in a bus numbered 1:num_buses
     bus_alloc = dict()  # maps which bus a person is in
 
+    for i in range(num_buses):
+        buses[i] = []
+
     # 1. randomly initialize buses
-    bus_num = 0
     temp_node_list = list(graph.nodes)
-    random.shuffle(temp_node_list)
     for node in temp_node_list:
-        buses[bus_num].append(node)
-        bus_alloc[node] = bus_num
-        bus_num = (bus_num + 1) % num_buses
+        max_score = 0
+        bus_choice = None
+        emptiest_bus_size = len(buses[0])
+        emptiest_bus = 0
+
+        for bus in buses:
+            if len(buses[bus]) < emptiest_bus_size:
+                emptiest_bus_size = len(buses[bus])
+                emptiest_bus = bus
+
+            penis = buses[bus].copy()
+            penis.append(node)
+            bus_score = score_graph(graph, penis, constraints)
+            if bus_score > max_score and len(buses[bus]) < size_bus:
+                max_score = bus_score
+                bus_choice = bus
+
+        if bus_choice is not None:
+            buses[bus_choice].append(node)
+            bus_alloc[node] = bus_choice
+        else:
+            buses[emptiest_bus].append(node)
+            bus_alloc[node] = emptiest_bus
 
     print('done allocating buses')
     # 2. for each node, calculate score for shifting node to another bus and find max bus
@@ -79,17 +100,21 @@ def solve(graph, num_buses, size_bus, constraints):
 
         # initialize base scores which are the scores of the bus the node currently belong to
         base_score = score_graph(graph, buses[bus_alloc[node]], constraints)
-        new_base_score = score_graph(graph, buses[bus_alloc[node]].copy().remove(node), constraints)
+        penis = buses[bus_alloc[node]].copy()
+        penis.remove(node)
+        new_base_score = score_graph(graph, penis, constraints)
 
         for i in range(num_buses):
             # calculate swap_score
-            swap_score = score_graph(graph, buses[i].copy().append(node), constraints) \
+            penis2 = buses[i].copy()
+            penis2.append(node)
+            swap_score = score_graph(graph, penis2, constraints) \
                          + new_base_score \
                          - score_graph(graph, buses[i], constraints) \
                          - base_score
 
             # if larger swap_score, update max_swap_score and indicate bus to do swap
-            if swap_score > max_swap_score:
+            if swap_score > max_swap_score and len(buses[i]) < size_bus:
                 max_swap_score = swap_score
                 swap_bus = i
 
@@ -101,6 +126,7 @@ def solve(graph, num_buses, size_bus, constraints):
             buses[swap_bus].append(node)
             # update back pointer
             bus_alloc[node] = swap_bus
+
 
     return buses
 
@@ -135,7 +161,8 @@ def main():
             output_file = open(output_category_path + "/" + input_name + ".out", "w")
 
             for bus in solution:
-                output_file.write("%s\n" % solution[bus])
+                if bus:
+                    output_file.write("%s\n" % solution[bus])
 
             output_file.close()
 
