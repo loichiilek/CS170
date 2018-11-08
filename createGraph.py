@@ -22,7 +22,14 @@ if sys.argv[1] == 's':
 
     for i in range(num_rowdy):
         rowdy_group = random.sample(range(0, num_student-1), random.randint(3, 5))
+        rowdy_group.sort()
         rowdy_group = list(map(str, rowdy_group))
+
+        while rowdy_group in rowdy_groups:
+            rowdy_group = random.sample(range(0, num_student-1), random.randint(3, 5))
+            rowdy_group.sort()
+            rowdy_group = list(map(str, rowdy_group))
+
         rowdy_groups.append(rowdy_group)
 
     print("Rowdy Groups: \n" + str(rowdy_groups) + "\n")
