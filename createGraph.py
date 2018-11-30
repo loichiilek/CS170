@@ -51,24 +51,24 @@ for i in range(num_rowdy):
 
 
 if sys.argv[1] == 's':
-    nx.write_gml(R, "./all_inputs/small/easy/graph.gml")
-    with open('./all_inputs/small/easy/parameters.txt', 'w') as o:
+    nx.write_gml(R, "./all_inputs/small/small/graph.gml")
+    with open('./all_inputs/small/small/parameters.txt', 'w') as o:
         o.write("%s\n" % str(k))
         o.write("%s\n" % str(s))
         for group in rowdy_groups:
             o.write("%s\n" % group)
 
 elif sys.argv[1] == 'm':
-    nx.write_gml(R, "./all_inputs/medium/easy/graph.gml")
-    with open('./all_inputs/medium/easy/parameters.txt', 'w') as o:
+    nx.write_gml(R, "./all_inputs/medium/medium/graph.gml")
+    with open('./all_inputs/medium/medium/parameters.txt', 'w') as o:
         o.write("%s\n" % str(k))
         o.write("%s\n" % str(s))
         for group in rowdy_groups:
             o.write("%s\n" % group)
 
 elif sys.argv[1] == 'l':
-    nx.write_gml(R, "./all_inputs/large/easy/graph.gml")
-    with open('./all_inputs/large/easy/parameters.txt', 'w') as o:
+    nx.write_gml(R, "./all_inputs/large/large/graph.gml")
+    with open('./all_inputs/large/large/parameters.txt', 'w') as o:
         o.write("%s\n" % str(k))
         o.write("%s\n" % str(s))
         for group in rowdy_groups:
