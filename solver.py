@@ -2,6 +2,7 @@ import networkx as nx
 import os
 from collections import defaultdict
 import random
+import math
 
 ###########################################
 # Change this variable to the path to 
@@ -87,9 +88,9 @@ def solve(graph, num_buses, size_bus, constraints):
                 emptiest_bus_size = len(buses[bus])
                 emptiest_bus = bus
 
-            penis = buses[bus].copy()
-            penis.append(node)
-            bus_score = score_graph(graph, penis, constraints)
+            temp_bus_list_1 = buses[bus].copy()
+            temp_bus_list_1.append(node)
+            bus_score = score_graph(graph, temp_bus_list_1, constraints)
             if bus_score > max_score and len(buses[bus]) < size_bus:
                 max_score = bus_score
                 bus_choice = bus
@@ -101,106 +102,78 @@ def solve(graph, num_buses, size_bus, constraints):
             buses[emptiest_bus].append(node)
             bus_alloc[node] = emptiest_bus
 
-    print('done allocating buses')
+    print('done allocating buses ')
     # 2. for each node, calculate score for shifting node to another bus and find max bus
-    for node in graph.nodes:
-        max_swap_score = 0
-        swap_bus = None
+    temperature = 0.13
 
-        # initialize base scores which are the scores of the bus the node currently belong to
-        base_score = score_graph(graph, buses[bus_alloc[node]], constraints)
-        penis = buses[bus_alloc[node]].copy()
-        penis.remove(node)
-        new_base_score = score_graph(graph, penis, constraints)
+    for iteration in range(4):
 
-        for i in range(num_buses):
-            # calculate swap_score
-            penis2 = buses[i].copy()
-            penis2.append(node)
-            swap_score = score_graph(graph, penis2, constraints) \
-                         + new_base_score \
-                         - score_graph(graph, buses[i], constraints) \
-                         - base_score
+        for node in graph.nodes:
+            max_swap_score = 0
+            swap_bus = None
 
-            # if larger swap_score, update max_swap_score and indicate bus to do swap
-            if swap_score > max_swap_score and len(buses[i]) < size_bus:
-                max_swap_score = swap_score
-                swap_bus = i
+            # initialize base scores which are the scores of the bus the node currently belong to
+            base_score = score_graph(graph, buses[bus_alloc[node]], constraints)
+            temp_bus_list_1 = buses[bus_alloc[node]].copy()
+            temp_bus_list_1.remove(node)
+            new_base_score = score_graph(graph, temp_bus_list_1, constraints)
 
-        # swapping condition is positive
-        if (swap_bus is not None) and (len(buses[bus_alloc[node]]) > 1):
-            # remove from original bus
-            buses[bus_alloc[node]].remove(node)
-            # add to new bus
-            buses[swap_bus].append(node)
-            # update back pointer
-            bus_alloc[node] = swap_bus
+            for i in range(num_buses):
+                # calculate swap_score
+                temp_bus_list_2 = buses[i].copy()
+                temp_bus_list_2.append(node)
+                swap_score = score_graph(graph, temp_bus_list_2, constraints) \
+                             + new_base_score \
+                             - score_graph(graph, buses[i], constraints) \
+                             - base_score
 
-    for node in graph.nodes:
-        max_swap_score = 0
-        swap_bus = None
+                # if larger swap_score, update max_swap_score and indicate bus to do swap
+                if swap_score > max_swap_score and len(buses[i]) < size_bus:
+                    max_swap_score = swap_score
+                    swap_bus = i
 
-        # initialize base scores which are the scores of the bus the node currently belong to
-        base_score = score_graph(graph, buses[bus_alloc[node]], constraints)
-        penis = buses[bus_alloc[node]].copy()
-        penis.remove(node)
-        new_base_score = score_graph(graph, penis, constraints)
+            # random_val = random.random()
+            #
+            # if (len(buses[bus_alloc[node]]) > 1) and random_val < temperature / (iteration + 1) and iteration != 3:
+            #     swap_bus = random.randint(0, num_buses - 1)
+            #     if len(buses[swap_bus]) < size_bus:
+            #         # remove from original bus
+            #         buses[bus_alloc[node]].remove(node)
+            #         # add to new bus
+            #         buses[swap_bus].append(node)
+            #         # update back pointer
+            #         bus_alloc[node] = swap_bus
+            #
+            # # swapping condition is positive
+            # elif (swap_bus is not None) and (len(buses[bus_alloc[node]]) > 1):
+            #     # remove from original bus
+            #     buses[bus_alloc[node]].remove(node)
+            #     # add to new bus
+            #     buses[swap_bus].append(node)
+            #     # update back pointer
+            #     bus_alloc[node] = swap_bus
 
-        for i in range(num_buses):
-            # calculate swap_score
-            penis2 = buses[i].copy()
-            penis2.append(node)
-            swap_score = score_graph(graph, penis2, constraints) \
-                         + new_base_score \
-                         - score_graph(graph, buses[i], constraints) \
-                         - base_score
 
-            # if larger swap_score, update max_swap_score and indicate bus to do swap
-            if swap_score > max_swap_score and len(buses[i]) < size_bus:
-                max_swap_score = swap_score
-                swap_bus = i
 
-        # swapping condition is positive
-        if (swap_bus is not None) and (len(buses[bus_alloc[node]]) > 1):
-            # remove from original bus
-            buses[bus_alloc[node]].remove(node)
-            # add to new bus
-            buses[swap_bus].append(node)
-            # update back pointer
-            bus_alloc[node] = swap_bus
+            # swapping condition is positive
+            if (swap_bus is not None) and (len(buses[bus_alloc[node]]) > 1):
+                # remove from original bus
+                buses[bus_alloc[node]].remove(node)
+                # add to new bus
+                buses[swap_bus].append(node)
+                # update back pointer
+                bus_alloc[node] = swap_bus
 
-    for node in graph.nodes:
-        max_swap_score = 0
-        swap_bus = None
+            elif (len(buses[bus_alloc[node]]) > 1) and random.random() < temperature / (iteration + 1) and iteration != 3:
+                swap_bus = random.randint(0, num_buses - 1)
+                if len(buses[swap_bus]) < size_bus:
+                    # remove from original bus
+                    buses[bus_alloc[node]].remove(node)
+                    # add to new bus
+                    buses[swap_bus].append(node)
+                    # update back pointer
+                    bus_alloc[node] = swap_bus
 
-        # initialize base scores which are the scores of the bus the node currently belong to
-        base_score = score_graph(graph, buses[bus_alloc[node]], constraints)
-        penis = buses[bus_alloc[node]].copy()
-        penis.remove(node)
-        new_base_score = score_graph(graph, penis, constraints)
-
-        for i in range(num_buses):
-            # calculate swap_score
-            penis2 = buses[i].copy()
-            penis2.append(node)
-            swap_score = score_graph(graph, penis2, constraints) \
-                         + new_base_score \
-                         - score_graph(graph, buses[i], constraints) \
-                         - base_score
-
-            # if larger swap_score, update max_swap_score and indicate bus to do swap
-            if swap_score > max_swap_score and len(buses[i]) < size_bus:
-                max_swap_score = swap_score
-                swap_bus = i
-
-        # swapping condition is positive
-        if (swap_bus is not None) and (len(buses[bus_alloc[node]]) > 1):
-            # remove from original bus
-            buses[bus_alloc[node]].remove(node)
-            # add to new bus
-            buses[swap_bus].append(node)
-            # update back pointer
-            bus_alloc[node] = swap_bus
 
 
 
@@ -228,10 +201,13 @@ def main():
         if not os.path.isdir(output_category_path):
             os.mkdir(output_category_path)
 
+        count = 1
         for input_folder in os.listdir(category_dir):
             input_name = os.fsdecode(input_folder)
             graph, num_buses, size_bus, constraints = parse_input(category_path + "/" + input_name)
             solution = solve(graph, num_buses, size_bus, constraints)
+            print(count)
+            count += 1
             output_file = open(output_category_path + "/" + input_name + ".out", "w")
 
             for bus in solution:
